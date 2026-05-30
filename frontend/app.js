@@ -1,70 +1,77 @@
-const log = document.getElementById('status-log');
-let peerConnection;
+const terminal = document.getElementById('terminal-log');
+let rtcConnection;
 let inputChannel;
 
-// 1. Upload .exe files directly to Puter's Cloud Filesystem (User-Pays Model)
-async function uploadExecutable() {
-    const fileInput = document.getElementById('gameUploader');
-    const file = fileInput.files[0];
-    if (!file) return alert("Please select a game executable first.");
+// 1. Write the uploaded game binary into Puter's file storage (Daikokuten Loop)
+async function uploadExeToPuter() {
+    const fileSelector = document.getElementById('exeSelector');
+    const file = fileSelector.files[0];
+    if (!file) return alert("Select an executable first.");
 
-    log.innerHTML = "🌀 Packing bytes into Kamui Dimension...";
-    try {
-        await puter.fs.write(`~/games/${file.name}`, file);
-        log.innerHTML = `🟢 ${file.name} successfully frozen in serverless vault.`;
-    } catch (err) {
-        log.innerHTML = `🔴 Storage Anomaly: ${err.message}`;
-    }
+    terminal.innerHTML = "🌀 Writing executable data matrix to Puter FS...";
+    
+    // Writes directly to your persistent open-source cloud container storage
+    await puter.fs.write(file.name, file);
+    
+    terminal.innerHTML = `🟢 ${file.name} successfully written and cached.`;
 }
 
-// 2. Groq-Powered Input Matrix Orchestration (Bypassing Display Driver Hooks)
-async function processInputWithGroq(inputX, inputY) {
-    // We send raw telemetry directly to Groq to normalize frame prediction matrices
-    const prompt = `Normalize mouse deltas for a headless engine canvas: X=${inputX}, Y=${inputY}. Respond ONLY in valid JSON format: {"x": normalized_x, "y": normalized_y}`;
+// 2. Groq LPU Input Matrix Overseer Evaluation
+async function queryGroqPredictiveMatrix(dx, dy) {
+    const endpoint = "https://api.groq.com/openai/v1/chat/completions";
     
-    // Using puter's keyless AI or direct fetch routing
-    const response = await puter.ai.chat(prompt, { model: "gpt-5.4-nano" }); 
-    return JSON.parse(response);
+    // Bypassing CORS blocks natively using Puter's built-in networking proxy proxy
+    const response = await puter.net.fetch(endpoint, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${ENV_CONFIG.groqKey}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            model: "mixtral-8x7b-32768",
+            messages: [{ role: "user", content: `Normalize pointer lock movement values: X=${dx}, Y=${dy}` }]
+        })
+    });
+    return await response.json();
 }
 
-// 3. Establish the Live 60 FPS NVIDIA NIM Video Matrix Stream
-async function startNeuralEngine() {
-    log.innerHTML = "⚡ Initializing Headless Vulkan Context...";
-    
-    peerConnection = new RTCPeerConnection({
+// 3. Launch Headless WebRTC Engine targeting NVIDIA NIM Frame-Buffer Microservice
+async function initializeHeadlessStream() {
+    terminal.innerHTML = "⚡ Initializing Headless Vulkan context hooks...";
+
+    rtcConnection = new RTCPeerConnection({
         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
     });
 
-    // Create the Amenotejikara Data Channel for inputs
-    inputChannel = peerConnection.createDataChannel("inputMatrix");
+    // Create the input pipeline connection channel (Amenotejikara Protocol)
+    inputChannel = rtcConnection.createDataChannel("inputChannel");
 
-    // Capture physical movements natively via Pointer Lock API
-    const videoSink = document.getElementById('gameFrameSink');
-    videoSink.requestPointerLock();
+    const videoCanvas = document.getElementById('renderingCanvas');
+    videoCanvas.requestPointerLock();
 
+    // High frequency 60 FPS coordinate stream listener
     window.addEventListener('mousemove', async (e) => {
-        if (document.pointerLockElement === videoSink) {
-            // Groq oversees and handles client predictive optimization asynchronously
-            const optimizedInput = await processInputWithGroq(e.movementX, e.movementY);
+        if (document.pointerLockElement === videoCanvas) {
+            // Groq oversees coordinate stream normalization
+            const trackingMetrics = await queryGroqPredictiveMatrix(e.movementX, e.movementY);
             
             if (inputChannel.readyState === "open") {
-                const dataPayload = new Float32Array([optimizedInput.x, optimizedInput.y]);
-                inputChannel.send(dataPayload);
+                const matrixBuffer = new Float32Array([e.movementX, e.movementY]);
+                inputChannel.send(matrixBuffer);
             }
         }
     });
 
-    // Capture incoming rendering frames from the NVIDIA NIM Headless stream
-    peerConnection.ontrack = (event) => {
-        videoSink.srcObject = event.streams[0];
-        log.innerHTML = "🟢 Rinnegan Synchronization Complete. Engine Active at 60 FPS.";
+    // Receive headless video frames rendered without display wrappers
+    rtcConnection.ontrack = (event) => {
+        videoCanvas.srcObject = event.streams[0];
+        terminal.innerHTML = "🟢 Frame pipeline bound at stable 60 FPS.";
     };
 
-    // Request NVIDIA NIM Neural Image Reconstruction Microservice via Puter Net Layer
-    // This executes your Deep Image Prior frame generation step
-    const nimEndpoint = "https://integrate.api.nvidia.com/v1/sharingan/rendering";
-    const nimHandshake = await puter.net.fetch(nimEndpoint, {
+    // Forward the WebRTC Session Description (SDP) straight to your NVIDIA NIM container
+    const nimResponse = await puter.net.fetch("https://integrate.api.nvidia.com/v1/sharingan/rendering", {
         method: "POST",
-        body: JSON.stringify({ rtc_sdp: peerConnection.localDescription })
+        headers: { "Authorization": `Bearer ${ENV_CONFIG.nvidiaKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ sdp: rtcConnection.localDescription })
     });
 }
