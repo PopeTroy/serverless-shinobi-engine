@@ -2,30 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UESP Headless Gaming Portal</title>
+    <title>UESP Headless Gaming Console</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://js.puter.com/v2/"></script>
+    <script src="secrets.js"></script>
 </head>
 <body>
-    <div id="app-container">
-        <header>
-            <h1>Shinobi Engine Console</h1>
-            <p>Managed via Puter.js • Supercharged by Groq & NVIDIA NIM</p>
-        </header>
-
-        <main>
-            <div id="vault-panel">
-                <h3>Daikokuten Storage Vault</h3>
-                <input type="file" id="gameUploader" accept=".exe" />
-                <button onclick="uploadExecutable()">Upload Game (.exe)</button>
-                <div id="status-log">System: Awaiting Execution Blueprint...</div>
-            </div>
-
-            <div id="render-viewport">
-                <video id="gameFrameSink" autoplay playsinline muted></video>
-            </div>
-        </main>
+    <div id="console-wrapper">
+        <div id="controls">
+            <h2>Daikokuten Cloud Vault</h2>
+            <input type="file" id="exeSelector" accept=".exe" />
+            <button onclick="uploadExeToPuter()">Upload Game (.exe)</button>
+            <div id="terminal-log">System Status: Awaiting Matrix...</div>
+        </div>
+        <div id="viewport-container">
+            <video id="renderingCanvas" autoplay playsinline muted></video>
+        </div>
     </div>
     <script src="app.js"></script>
 </body>
