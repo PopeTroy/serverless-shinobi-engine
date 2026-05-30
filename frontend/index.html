@@ -3,36 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UESP Headless Gaming Console</title>
+    <title>UESP Headless Gaming Platform Hub</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Injecting Open Source Puter.js Kernel Framework -->
     <script src="https://js.puter.com/v2/"></script>
-    <!-- Injecting the secrets built dynamically by GitHub Actions -->
     <script src="secrets.js"></script>
 </head>
 <body>
-    <div id="console-wrapper">
-        <div id="controls">
-            <h2>Daikokuten Cloud Vault</h2>
-            <p class="subtitle">Upload executables and stream gameplay loops via headless serverless grids.</p>
+    <div id="app-grid">
+        <aside id="category-sidebar">
+            <div class="logo">🥷 SHINOBI OS</div>
             
-            <div class="upload-zone">
-                <input type="file" id="exeSelector" accept=".exe" />
-                <button onclick="uploadExeToPuter()">Upload Game (.exe)</button>
+            <div class="nav-section">
+                <h3>Sorting Filters</h3>
+                <button class="filter-btn active" id="sort-all" onclick="setSortMode('all')">All Games</button>
+                <button class="filter-btn" id="sort-az" onclick="setSortMode('az')">A-Z Catalog</button>
             </div>
 
-            <div class="execution-zone">
-                <button id="streamTrigger" class="launch-btn" onclick="initializeHeadlessStream()">Initialize Headless Matrix</button>
+            <div class="nav-section">
+                <h3>Genre Matrices</h3>
+                <button class="genre-btn" onclick="filterByGenre('Action')">Action</button>
+                <button class="genre-btn" onclick="filterByGenre('Adventure')">Adventure</button>
+                <button class="genre-btn" onclick="filterByGenre('Horror')">Horror</button>
+                <button class="genre-btn" onclick="filterByGenre('RPG')">RPG</button>
+                <button class="genre-btn" onclick="filterByGenre('Simulation')">Simulation</button>
             </div>
+        </aside>
 
-            <div id="terminal-log">System Status: Awaiting Matrix Initialization...</div>
-        </div>
-        
-        <div id="viewport-container">
-            <!-- Frame streams from NVIDIA NIM render loops bind here without window displays -->
-            <video id="renderingCanvas" autoplay playsinline muted></video>
+        <main id="main-content">
+            <header id="top-navbar">
+                <div class="search-box">
+                    <input type="text" id="gameSearchInput" placeholder="🔍 Search game vault repository..." onkeyup="executeCatalogSearch()" />
+                </div>
+                <div class="user-profile-widget">
+                    <span id="nav-user-display" class="matrix-text">Guest Player</span>
+                    <button id="settings-toggle-btn" class="icon-btn" onclick="toggleSettingsModal()">⚙️</button>
+                </div>
+            </header>
+
+            <div id="content-body">
+                <div id="viewport-container">
+                    <video id="renderingCanvas" autoplay playsinline muted></video>
+                    <div id="viewport-overlay-ui">Click Viewport To Engage Virtual Inputs</div>
+                </div>
+
+                <div id="dashboard-dock">
+                    <div class="hud-card" id="save-sessions-card">
+                        <h3>Active Saved Game Sessions</h3>
+                        <div class="table-wrapper">
+                            <table id="save-sessions-table">
+                               <thead>
+                                   <tr>
+                                       <th>Game Identity</th>
+                                       <th>Session ID</th>
+                                       <th>Timestamp</th>
+                                       <th>Actions</th>
+                                   </tr>
+                               </thead>
+                               <tbody id="save-sessions-tbody">
+                                   </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="hud-card" id="daikokuten-vault-card">
+                        <h3>Daikokuten Cloud Vault</h3>
+                        <div class="upload-form">
+                            <input type="text" id="gameMetaTitle" placeholder="Game Title" />
+                            <select id="gameMetaGenre">
+                                <option value="Action">Action</option>
+                                <option value="Adventure">Adventure</option>
+                                <option value="Horror">Horror</option>
+                                <option value="RPG">RPG</option>
+                                <option value="Simulation">Simulation</option>
+                            </select>
+                            <input type="file" id="exeSelector" accept=".exe" />
+                            <button class="action-btn" onclick="uploadExeToPuter()">Package Executable</button>
+                        </div>
+                        <div id="terminal-log">System Status: System Initialized.</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h2>Platform Configuration Matrix</h2>
+                <button class="close-modal-btn" onclick="toggleSettingsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <label>Player Profile Data Authentication</label>
+                    <button id="auth-action-btn" onclick="handlePlatformAuth()">Sign In with Puter</button>
+                </div>
+                <hr class="hud-divider" />
+                <div class="settings-group">
+                    <label>Target Target Stream Frame Rate Scaling</label>
+                    <select id="setting-fps-lock" onchange="saveProfileSettings()">
+                        <option value="60">60 FPS (Optimized Realtime)</option>
+                        <option value="30">30 FPS (Low Bandwidth Modality)</option>
+                    </select>
+                </div>
+                <div class="settings-group">
+                    <label>Telemetry Timezone Matrix String</label>
+                    <input type="text" id="setting-timezone" value="UTC-Universal" readonly />
+                </div>
+            </div>
         </div>
     </div>
-    <script src="app.js"></script>
 </body>
 </html>
