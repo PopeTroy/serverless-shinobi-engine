@@ -2,20 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UESP Headless Gaming Console</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Injecting Open Source Puter.js Kernel Framework -->
     <script src="https://js.puter.com/v2/"></script>
+    <!-- Injecting the secrets built dynamically by GitHub Actions -->
     <script src="secrets.js"></script>
 </head>
 <body>
     <div id="console-wrapper">
         <div id="controls">
             <h2>Daikokuten Cloud Vault</h2>
-            <input type="file" id="exeSelector" accept=".exe" />
-            <button onclick="uploadExeToPuter()">Upload Game (.exe)</button>
-            <div id="terminal-log">System Status: Awaiting Matrix...</div>
+            <p class="subtitle">Upload executables and stream gameplay loops via headless serverless grids.</p>
+            
+            <div class="upload-zone">
+                <input type="file" id="exeSelector" accept=".exe" />
+                <button onclick="uploadExeToPuter()">Upload Game (.exe)</button>
+            </div>
+
+            <div class="execution-zone">
+                <button id="streamTrigger" class="launch-btn" onclick="initializeHeadlessStream()">Initialize Headless Matrix</button>
+            </div>
+
+            <div id="terminal-log">System Status: Awaiting Matrix Initialization...</div>
         </div>
+        
         <div id="viewport-container">
+            <!-- Frame streams from NVIDIA NIM render loops bind here without window displays -->
             <video id="renderingCanvas" autoplay playsinline muted></video>
         </div>
     </div>
