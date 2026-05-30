@@ -3,104 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UESP Headless Gaming Platform Hub</title>
+    <title>Shinobi GenAI World Simulator</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://js.puter.com/v2/"></script>
     <script src="secrets.js"></script>
 </head>
 <body>
     <div id="app-grid">
-        <aside id="category-sidebar">
-            <div class="logo">🥷 SHINOBI OS</div>
-            
-            <div class="nav-section">
-                <h3>Sorting Filters</h3>
-                <button class="filter-btn active" id="sort-all" onclick="setSortMode('all')">All Games</button>
-                <button class="filter-btn" id="sort-az" onclick="setSortMode('az')">A-Z Catalog</button>
+        <aside id="creator-sidebar">
+            <div class="logo">🌀 SHINOBI ENGINE</div>
+            <p class="subtitle">Neural Interactive World Model Generator</p>
+
+            <div class="input-group">
+                <h3>1. Dream the Environment</h3>
+                <textarea id="worldPrompt" placeholder="Describe your game world... (e.g., 'A cyberpunk alleyway in heavy rain, neon lights reflecting on wet asphalt, retro-futuristic arcade machines glowing.')"></textarea>
             </div>
 
-            <div class="nav-section">
-                <h3>Genre Matrices</h3>
-                <button class="genre-btn" onclick="filterByGenre('Action')">Action</button>
-                <button class="genre-btn" onclick="filterByGenre('Adventure')">Adventure</button>
-                <button class="genre-btn" onclick="filterByGenre('Horror')">Horror</button>
-                <button class="genre-btn" onclick="filterByGenre('RPG')">RPG</button>
-                <button class="genre-btn" onclick="filterByGenre('Simulation')">Simulation</button>
+            <div class="input-group">
+                <h3>2. Logic & Mechanics</h3>
+                <select id="gameGenre">
+                    <option value="Horror">Psychological Horror Simulation</option>
+                    <option value="Adventure">Open-World Exploration Journey</option>
+                    <option value="Action">High-Velocity Cyber Action Matrix</option>
+                    <option value="RPG">Neural Choice Role-Playing Domain</option>
+                </select>
             </div>
+
+            <button id="generate-btn" class="launch-btn" onclick="generateNeuralWorld()">Manifest Simulation</button>
+            <div id="terminal-log">System: Ready to manifest latent realities...</div>
         </aside>
 
         <main id="main-content">
             <header id="top-navbar">
-                <div class="search-box">
-                    <input type="text" id="gameSearchInput" placeholder="🔍 Search game vault repository..." onkeyup="executeCatalogSearch()" />
+                <div class="status-indicator">
+                    Active Profile: <span id="user-display" class="matrix-text">Loading Node...</span>
                 </div>
-                <div class="user-profile-widget">
-                    <span id="nav-user-display" class="matrix-text">Guest Player</span>
-                    <button id="settings-toggle-btn" class="icon-btn" onclick="toggleSettingsModal()">⚙️</button>
+                <div class="session-indicator">
+                    Simulation Latent Hash: <span id="session-hash" class="matrix-text">None</span>
                 </div>
             </header>
 
-            <div id="content-body">
-                <div id="viewport-container">
-                    <video id="renderingCanvas" autoplay playsinline muted></video>
-                    <div id="viewport-overlay-ui">Click Viewport To Engage Virtual Inputs</div>
-                </div>
-
-                <div id="dashboard-dock">
-                    <div class="hud-card" id="save-sessions-card">
-                        <h3>Active Saved Game Sessions</h3>
-                        <div class="table-wrapper">
-                            <table id="save-sessions-table">
-                               <thead>
-                                   <tr>
-                                       <th>Game Identity</th>
-                                       <th>Session ID</th>
-                                       <th>Timestamp</th>
-                                       <th>Actions</th>
-                                   </tr>
-                               </thead>
-                               <tbody id="save-sessions-tbody">
-                                   </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="hud-card" id="daikokuten-vault-card">
-                        <h3>Daikokuten Cloud Vault</h3>
-                        <div class="upload-form">
-                            <input type="text" id="gameMetaTitle" placeholder="Game Title" />
-                            <select id="gameMetaGenre">
-                                <option value="Action">Action</option>
-                                <option value="Adventure">Adventure</option>
-                                <option value="Horror">Horror</option>
-                                <option value="RPG">RPG</option>
-                                <option value="Simulation">Simulation</option>
-                            </select>
-                            <input type="file" id="exeSelector" accept=".exe" />
-                            <button class="action-btn" onclick="uploadExeToPuter()">Package Executable</button>
-                        </div>
-                        <div id="terminal-log">System Status: System Initialized.</div>
-                    </div>
-                </div>
+            <div id="viewport-container">
+                <video id="renderingCanvas" autoplay playsinline muted></video>
+                <div id="viewport-overlay">Awaiting Neural World Generation Vector...</div>
             </div>
         </main>
     </div>
-
-    <div id="settings-modal" class="modal-overlay">
-        <div class="modal-window">
-            <div class="modal-header">
-                <h2>Platform Configuration Matrix</h2>
-                <button class="close-modal-btn" onclick="toggleSettingsModal()">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="settings-group">
-                    <label>Player Profile Data Authentication</label>
-                    <button id="auth-action-btn" onclick="handlePlatformAuth()">Sign In with Puter</button>
-                </div>
-                <hr class="hud-divider" />
-                <div class="settings-group">
-                    <label>Target Target Stream Frame Rate Scaling</label>
-                    <select id="setting-fps-lock" onchange="saveProfileSettings()">
+    <script src="app.js"></script>
+</body>
+</html>
                         <option value="60">60 FPS (Optimized Realtime)</option>
                         <option value="30">30 FPS (Low Bandwidth Modality)</option>
                     </select>
