@@ -1,0 +1,19 @@
+name: Deploy Frontend Matrix to Puter
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Puter Cloud
+        uses: HeyPuter/puter-subdomain-deploy-action@v1
+        with:
+          subdomain: "shinobi-engine"
+          puter_path: "~/sites/shinobi-engine"
+          source_path: "./frontend"
+          puter_token: ${{ secrets.PUTER_AUTH_TOKEN }}
