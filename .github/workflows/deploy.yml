@@ -2,15 +2,16 @@ name: Deploy Open-Source Shinobi Engine
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout Code Matrix
         uses: actions/checkout@v4
 
-      # Creates a secure module dynamically using your GitHub repository secrets
+      # Dynamically compiles the environmental keys into an isolated JavaScript file
       - name: Inject Groq and NVIDIA Secrets
         run: |
           echo "const ENV_CONFIG = {
@@ -18,8 +19,8 @@ jobs:
             nvidiaKey: '${{ secrets.NVIDIA_NIM_KEY }}'
           };" > ./frontend/secrets.js
 
-      - name: Upload Build Artifacts
+      - name: Upload Complete Distribution Package
         uses: actions/upload-artifact@v4
         with:
-          name: site-distribution
+          name: shinobi-engine-build
           path: ./frontend/
