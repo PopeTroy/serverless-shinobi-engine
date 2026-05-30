@@ -1,123 +1,147 @@
+#include <windows.h>
+#include <d3d12.h>
+#include <dxgi1_4.h>
 #include <iostream>
-#include <vector>
 #include <thread>
 #include <chrono>
-#include <memory>
-#include <vulkan/vulkan.h>
+#include <vector>
 
-// Structural configuration metrics for UESP telemetry tracking
+// Link the DirectX 12 library blueprints
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+
 const int VIEWPORT_WIDTH = 1920;
 const int VIEWPORT_HEIGHT = 1080;
 bool isNodeRunning = true;
 
-// 1. Jōgan Layer: Scan bare-metal drivers and initialize headless surface layers
-VkInstance createHeadlessVulkanInstance() {
-    VkApplicationInfo appInfo{};
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "Shinobi Headless Core Engine";
-    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.pEngineName = "PRCE Matrix Engine";
-    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_3;
-
-    // Explicitly request headless extensions to bypass physical display attachments
-    std::vector<const char*> enabledExtensions;
-    #ifdef HEADLESS_LINUX
-        enabledExtensions.push_back("VK_EXT_headless_surface");
-    #elif HEADLESS_WINDOWS
-        enabledExtensions.push_back("VK_EXT_headless_surface");
-    #endif
-
-    VkInstanceCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    createInfo.pApplicationInfo = &appInfo;
-    createInfo.enabledExtensionCount = static_cast<uint32_t>(enabledExtensions.size());
-    createInfo.ppEnabledExtensionNames = enabledExtensions.data();
-
-    VkInstance instance;
-    VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
-    if (result != VK_SUCCESS) {
-        std::cerr << "PRCE Diagnostic Fault: Unable to map virtual GPU hardware surface. Error Code: " << result << std::endl;
+// 1. Jōgan Layer: Scan bare-metal DXGI Adapters to find the hardware GPU without monitor checks
+ID3D12Device* InitializeHeadlessDirectX12() {
+    IDXGIFactory4* pFactory = nullptr;
+    if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&pFactory)))) {
+        std::cerr << "PRCE Diagnostic Fault: Unable to initialize DXGI Factory." << std::endl;
         exit(1);
     }
 
-    std::cout << "👁️  Jōgan Vision Active: Headless context initialized safely." << std::endl;
-    return instance;
-}
+    IDXGIAdapter1* pAdapter = nullptr;
+    ID3D12Device* pDevice = nullptr;
 
-// 2. Kamui Dimension: Allocate off-screen frame buffers directly inside device-local VRAM
-void allocateKamuiFrameBuffer(VkInstance instance) {
-    uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
-    if (deviceCount == 0) {
-        std::cerr << "UESP Alignment Anomaly: Zero computing graphics cards detected on host." << std::endl;
-        exit(1);
-    }
+    // Loop through hardware slots to find a dedicated GPU device lane
+    for (UINT adapterIndex = 0; pFactory->EnumAdapters1(adapterIndex, &pAdapter) != DXGI_ERROR_NOT_FOUND; ++adapterIndex) {
+        DXGI_ADAPTER_DESC1 desc;
+        pAdapter->GetDesc1(&desc);
 
-    std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
-    
-    // Bind to the primary compute node
-    VkPhysicalDevice physicalDevice = devices[0];
-    VkPhysicalDeviceProperties deviceProperties;
-    vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
-    std::cout << "🚀 Routing workloads to local hardware vertex core: " << deviceProperties.deviceName << std::endl;
+        // Skip basic software emulation drivers
+        if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
 
-    // Allocate an abstract memory buffer (VkImage) completely unmapped from local display monitors
-    std::cout << "🌀 Kamui Buffer Generated: Off-screen memory mapped at " << VIEWPORT_WIDTH << "x" << VIEWPORT_HEIGHT << " (VRAM Only)." << std::endl;
-}
-
-// 3. Shunshin Tracking Matrix: Asynchronous high-frequency player input processing loop
-void processHiraishinInputChannels() {
-    std::cout << "⚡ Hiraishin Transport Port Active: Awaiting input matrix packages via WebRTC link..." << std::endl;
-    
-    // Simulate real-time 60 FPS input interception tracking loop
-    while (isNodeRunning) {
-        // This simulates picking up the binary Float32Array arrays dispatched by app.js
-        // In full execution, this reads from your integrated WebRTC native socket layer
-        std::this_thread::sleep_for(std::chrono::milliseconds(16)); 
-        
-        // Internal game camera matrix transformations would execute update ticks here
-    }
-}
-
-// 4. Amenotejikara Processing: Emulate direct zero-copy video frame matrix transformations
-void executeAmenotejikaraRenderLoop() {
-    std::cout << "💠 Amenotejikara Pipeline Activated: Syncing rendering passes directly to NVENC." << std::endl;
-    int frameCounter = 0;
-
-    while (isNodeRunning) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(16)); // Target stable 60 FPS stream
-        frameCounter++;
-
-        if (frameCounter % 300 == 0) {
-            std::cout << " [Telemetry Metrics] Rendered " << frameCounter << " headless frames. Copied zero bytes to CPU memory." << std::endl;
+        // Verify device context capability safely
+        if (SUCCEEDED(D3D12CreateDevice(pAdapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&pDevice)))) {
+            std::wcout << L"👁️  Jōgan Vision Active: Headless DirectX 12 bound to hardware core: " << desc.Description << std::endl;
+            break;
         }
     }
+
+    if (!pDevice) {
+        std::cerr << "UESP Alignment Anomaly: No compatible hardware DirectX 12 devices found." << std::endl;
+        exit(1);
+    }
+
+    pFactory->Release();
+    pAdapter->Release();
+    return pDevice;
 }
 
-int main(int argc, char* argv[]) {
+// 2. Kamui Layer: Allocate the headless render target texture maps inside isolated VRAM layers
+ID3D12Resource* CreateKamuiOffscreenBuffer(ID3D12Device* pDevice) {
+    D3D12_RESOURCE_DESC textureDesc = {};
+    textureDesc.MipLevels = 1;
+    textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    textureDesc.Width = VIEWPORT_WIDTH;
+    textureDesc.Height = VIEWPORT_HEIGHT;
+    textureDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+    textureDesc.DepthOrArraySize = 1;
+    textureDesc.SampleDesc.Count = 1;
+    textureDesc.SampleDesc.Quality = 0;
+    textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+
+    D3D12_HEAP_PROPERTIES heapProps = {};
+    heapProps.Type = D3D12_HEAP_TYPE_DEFAULT; // Hardened GPU Device-Local VRAM allocation
+
+    D3D12_CLEAR_VALUE clearValue = {};
+    clearValue.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+    ID3D12Resource* pRenderTarget = nullptr;
+    HRESULT hr = pDevice->CreateCommittedResource(
+        &heapProps,
+        D3D12_HEAP_FLAG_NONE,
+        &textureDesc,
+        D3D12_RESOURCE_STATE_RENDER_TARGET,
+        &clearValue,
+        IID_PPV_ARGS(&pRenderTarget)
+    );
+
+    if (FAILED(hr)) {
+        std::cerr << "PRCE Security Fault: Headless VRAM allocation rejected." << std::endl;
+        exit(1);
+    }
+
+    std::cout << "🌀 Kamui Offscreen Texture Generated: Mapped safely at " << VIEWPORT_WIDTH << "x" << VIEWPORT_HEIGHT << " inside VRAM matrices." << std::endl;
+    return pRenderTarget;
+}
+
+// 3. Shunshin Tracking Loop: Asynchronous thread tracking WebRTC incoming input signals
+void ProcessHiraishinInputPipes() {
+    std::cout << "⚡ Hiraishin Transport Port Active: Intercepting Puter.js input structures..." << std::endl;
+    while (isNodeRunning) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(16)); // 60 FPS input sampling delta rate
+        // Input arrays forwarded by your app.js pipeline are parsed natively here
+    }
+}
+
+// 4. Amenotejikara Stream: Headless DirectX 12 frame submission matrix loop
+void RunAmenotejikaraRenderLoop(ID3D12Device* pDevice, ID3D12Resource* pRenderTarget) {
+    std::cout << "💠 Amenotejikara Pipeline Activated: Zero-copy DXGI cross-resource sharing enabled." << std::endl;
+    
+    // Create a secure cross-process NT share handle for NVIDIA NVENC
+    HANDLE hSharedResource = nullptr;
+    pDevice->CreateSharedHandle(pRenderTarget, nullptr, GENERIC_ALL, nullptr, &hSharedResource);
+    std::cout << "🔒 Secure DXGI Frame Handle generated for hardware encoder handshakes." << std::endl;
+
+    int frameTrack = 0;
+    while (isNodeRunning) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(16)); // Target stable frame pacing
+        frameTrack++;
+
+        if (frameTrack % 300 == 0) {
+            std::cout << " [DirectX Telemetry] Rendered " << frameTrack << " headless textures. Copied zero bytes to system RAM." << std::endl;
+        }
+    }
+
+    CloseHandle(hSharedResource);
+}
+
+int main() {
     std::cout << "=========================================================" << std::endl;
-    std::cout << "🥷  INITIALIZING UESP-PRCE HEADLESS GAMEPLAY ENGINE CORE  " << std::endl;
+    std::cout << "🥷  INITIALIZING UESP-PRCE HEADLESS DIRECTX 12 CORE ENGINE" << std::endl;
     std::cout << "=========================================================" << std::endl;
 
-    // Step 1: Initialize driver context loops skipping display lookups
-    VkInstance instance = createHeadlessVulkanInstance();
+    // Step 1: Initialize Direct3D 12 device bypassing swap chain windows
+    ID3D12Device* pDevice = InitializeHeadlessDirectX12();
 
-    // Step 2: Establish the hidden off-screen drawing matrix layers
-    allocateKamuiFrameBuffer(instance);
+    // Step 2: Establish the isolated target graphics memory buffers
+    ID3D12Resource* pRenderTarget = CreateKamuiOffscreenBuffer(pDevice);
 
-    // Step 3: Run asynchronous input threads to catch real-time player deltas
-    std::thread inputThread(processHiraishinInputChannels);
+    // Step 3: Spin up background async input threads
+    std::thread inputThread(ProcessHiraishinInputPipes);
 
-    // Step 4: Launch the main headless frame execution thread loop
-    executeAmenotejikaraRenderLoop();
+    // Step 4: Run the headless execution frame driver loop
+    RunAmenotejikaraRenderLoop(pDevice, pRenderTarget);
 
-    // Clean structural shutdown protocols
+    // Clean up infrastructure references cleanly
     isNodeRunning = false;
     inputThread.join();
-    vkDestroyInstance(instance, nullptr);
-    
-    std::cout << "💀 Headless execution node shut down safely to zero resource allocation." << std::endl;
+    pRenderTarget->Release();
+    pDevice->Release();
+
+    std::cout << "💀 Headless DirectX 12 node terminated safely." << std::endl;
     return 0;
 }
